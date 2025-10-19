@@ -13,20 +13,27 @@ import scipy
 import pandas as pd
 import itertools
 
+### (0) Pre-check/データの前チェック
+### Check the columns to skip and the first wavelength in the spectral data region
+### ファイルをチェックし、データが始まるまでのカラム数と、スペクトルデータの最初の波長を確認して下記に入れる。
+file = os.path.join('20251015.csv') # The data CSV file
+skip_cols = 25 # Indicate how many columns are found up to the spectral data
+starting_WL = 190 # Indicate the first WL in the spectral data
+Absd = 'Abs 1' # Indicate the column name for the absrbance in the CSV file
+Abs_WL = 'A520' # Indicate the wavelength to show on the plot
+
 ### (1) Read the data ###
 ### Indicate the file
-dt = os.path.join('20251015.csv')
-skip_cols = 25 # Indicate how many columns are found up to the spectral data
-starting_WL = 190 # Indicate the first WL in the spectral region
-##-------------------------------------------------
+dt = os.path.join(file)
+###-------------------------------------------------
 sp = pd.read_csv(dt)
 samples = list(sp['Sample Name'])
-Absls = list(sp['Abs 1'])
+Absls = list(sp[Absd]) # You may need to check the file to know the column name for the absorbance
 
 ###--- (2) Decide the data ---###
 i = 0
 for _ in samples:
-    print('{}: {} (A520 = {})'.format(i, samples[i], Absls[i]))
+    print('{}: {} ({} = {})'.format(i, samples[i], Abs_WL, Absls[i]))
     i = i+1
 
 pltl1 = [0,1,2,6,3,4]
@@ -54,7 +61,7 @@ for _ in pltl:
     ax1.set_title(titles[i], fontsize=11)
     for j in pltl[i]:
         y = sp.iloc[j,x2]
-        ax1.plot(x, y, label = '{} (A520={})'.format(samples[j], Absls[j]))
+        ax1.plot(x, y, label = '{} ({}={})'.format(samples[j], Abs_WL, Absls[j]))
     ax1.legend(bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0, fontsize=10, ncol=1)
     ax1.set_xlim(xmin, xmax)
     ax1.set_xticks(np.arange(label_min, label_max, xint))
@@ -78,7 +85,7 @@ for _ in pltl:
     for j in pltl[i]:
         y = np.array(sp.iloc[j,x2], dtype = float)
         y_sm = scipy.signal.savgol_filter(y, w1, 2, deriv=0)
-        ax1.plot(x, y_sm, label = '{} (A280={})'.format(samples[j], Absls[j]))
+        ax1.plot(x, y_sm, label = '{} ({}={})'.format(samples[j], Abs_WL, Absls[j]))
     ax1.legend(bbox_to_anchor=(1, 1), loc='upper right', borderaxespad=0, fontsize=10, ncol=1)
     ax1.set_xlim(xmin, xmax)
     ax1.set_xticks(np.arange(label_min, label_max, xint))
@@ -99,3 +106,4 @@ for _ in pltl:
 #     y_sm = scipy.signal.savgol_filter(y, w1, 2, deriv=0)
 #     y_sm_2Der = np.gradient(np.gradient(y_sm))
 #     i = i+1
+
